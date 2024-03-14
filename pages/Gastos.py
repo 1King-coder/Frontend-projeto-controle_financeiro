@@ -653,14 +653,14 @@ class Gastos_Page(PageModel):
         ).json()
 
         actual_month = datetime.now().month
-        start_of_the_month = datetime.strptime(f'01-{actual_month-1}-{datetime.now().year} 00:00:00', '%d-%m-%Y %H:%M:%S')
-        end_of_the_month = datetime.strptime(f'01-{actual_month + 1 if actual_month != 12 else 1}-{datetime.now().year} 00:00:00', '%d-%m-%Y %H:%M:%S')
+        start_of_the_month = datetime.strptime(f'01/{actual_month/1}/{datetime.now().year}', '%d/%m/%Y')
+        end_of_the_month = datetime.strptime(f'01/{actual_month + 1 if actual_month != 12 else 1}/{datetime.now().year}', '%d/%m/%Y')
 
         for wid in frame.master.winfo_children()[1:]:
             wid.destroy()
 
         for i, gasto in enumerate(gastos_gerais):
-            if start_of_the_month <= datetime.strptime(gasto['created_at'], '%d-%m-%Y %H:%M:%S') < end_of_the_month:
+            if start_of_the_month <= datetime.strptime(gasto['created_at'], '%d/%m/%Y') < end_of_the_month:
             
                 frame_gasto = PageModel(frame.Frame(
                     {

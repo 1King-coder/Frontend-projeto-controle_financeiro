@@ -442,8 +442,8 @@ class Transferencias_Page(PageModel):
         ).json()
 
         actual_month = datetime.now().month
-        start_of_the_month = datetime.strptime(f'01-{actual_month-1}-{datetime.now().year} 00:00:00', '%d-%m-%Y %H:%M:%S')
-        end_of_the_month = datetime.strptime(f'01-{actual_month + 1 if actual_month != 12 else 1}-{datetime.now().year} 00:00:00', '%d-%m-%Y %H:%M:%S')
+        start_of_the_month = datetime.strptime(f'01/{actual_month/1}/{datetime.now().year}', '%d/%m/%Y')
+        end_of_the_month = datetime.strptime(f'01/{actual_month + 1 if actual_month != 12 else 1}/{datetime.now().year}', '%d/%m/%Y')
 
         tipo = 'banco' if not self.__getattribute__(f'tipo_tranferencia_{page}_switch').get() else 'direcionamento'
         local = 'banco' if self.__getattribute__(f'tipo_tranferencia_{page}_switch').get() else 'direcionamento'
@@ -452,7 +452,7 @@ class Transferencias_Page(PageModel):
             wid.destroy()
 
         for i, transferencia in enumerate(transferencias):
-            if start_of_the_month <= datetime.strptime(transferencia['created_at'], '%d-%m-%Y %H:%M:%S') < end_of_the_month:
+            if start_of_the_month <= datetime.strptime(transferencia['created_at'], '%d/%m/%Y') < end_of_the_month:
             
                 frame_transferencia = PageModel(frame.Frame(
                     {
