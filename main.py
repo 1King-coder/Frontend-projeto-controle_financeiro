@@ -23,7 +23,7 @@ def init_api ():
     pg.press('enter')
 
 
-init_api()
+# init_api()
 
 app = ctk.CTk(fg_color=colors['color1'])
 

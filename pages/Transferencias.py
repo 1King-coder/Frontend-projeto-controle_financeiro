@@ -53,8 +53,6 @@ class Transferencias_Page(PageModel):
         self.cria_widgets_tab_edita_Transferencia()
         self.cria_widgets_tab_excluir_Transferencia()
 
-        self.tab_view.set('Editar Transferência')
-
         self.tab_view.pack(expand=True, fill='both')
 
     
@@ -442,7 +440,7 @@ class Transferencias_Page(PageModel):
         ).json()
 
         actual_month = datetime.now().month
-        start_of_the_month = datetime.strptime(f'01/{actual_month/1}/{datetime.now().year}', '%d/%m/%Y')
+        start_of_the_month = datetime.strptime(f'01/{actual_month - 1}/{datetime.now().year}', '%d/%m/%Y')
         end_of_the_month = datetime.strptime(f'01/{actual_month + 1 if actual_month != 12 else 1}/{datetime.now().year}', '%d/%m/%Y')
 
         tipo = 'banco' if not self.__getattribute__(f'tipo_tranferencia_{page}_switch').get() else 'direcionamento'
