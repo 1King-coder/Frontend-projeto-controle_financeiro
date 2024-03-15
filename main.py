@@ -1,5 +1,4 @@
 import customtkinter as ctk
-from PIL import Image
 from pages.styles.colors import colors
 from pages.Home import HomePage
 import pyautogui as pg
@@ -19,7 +18,7 @@ def init_api ():
     pg.press('enter')
     pg.write('backendEnv\\Scripts\\activate')
     pg.press('enter')
-    pg.write('uvicorn main:app --reload')
+    pg.write('uvicorn main:app')
     pg.press('enter')
 
 
@@ -29,7 +28,7 @@ app = ctk.CTk(fg_color=colors['color1'])
 
 app.geometry("450x500")
 
-page_test = HomePage(app)
+page_test = HomePage(app)   
 
 page_test.build()
 

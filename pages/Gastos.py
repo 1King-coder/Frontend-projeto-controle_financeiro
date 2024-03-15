@@ -65,7 +65,7 @@ class Gastos_Page(PageModel):
             'id_banco': self.id_por_banco[gasto['banco']],
             'id_direcionamento': self.id_por_direcionamento[gasto['direcionamento']],
             'tipo_gasto': gasto['tipo'],
-            'valor' if gasto['tipo'] == 'imediato' else 'valor_parcela': gasto['valor'],
+            'valor' if gasto['tipo'] == 'imediato' else 'valor_parcela': float(gasto['valor']),
             'descricao': gasto['descricao'],
         }
 
@@ -916,7 +916,6 @@ class Gastos_Page(PageModel):
                 textvariable = ctk.StringVar(value=controle_parcelas)
             )
             
-
     def get_dados_gasto (self, page, gasto):
 
         dados_gasto = [
@@ -951,7 +950,7 @@ class Gastos_Page(PageModel):
         novo_deposito = {
             'novo_id_banco': novo_id_banco,
             'novo_id_direcionamento': novo_id_direcionamento,
-            'novo_valor': self.valor_entry_edit_Gasto.get(),
+            'novo_valor': float(self.valor_entry_edit_Gasto.get()),
             'nova_descricao': self.descricao_entry_edit_Gasto.get(),
         }
 

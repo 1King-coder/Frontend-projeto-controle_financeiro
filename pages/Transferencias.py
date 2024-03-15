@@ -221,7 +221,7 @@ class Transferencias_Page(PageModel):
             f'id_{tipo}_destino': id_destino,
             f'id_{local}': id_local,
             'descricao': self.descricao_entry_add_Transferencia.get(),
-            'valor': self.valor_entry_add_Transferencia.get()
+            'valor': float(self.valor_entry_add_Transferencia.get())
         }
 
         adicionou = post(
@@ -702,7 +702,7 @@ class Transferencias_Page(PageModel):
             f'novo_id_{tipo}_origem': novo_id_origem,
             f'novo_id_{tipo}_destino': novo_id_destino,
             f'novo_id_{local}': novo_id_local,
-            'novo_valor': self.valor_entry_edit_Transferencia.get(),
+            'novo_valor': float(self.valor_entry_edit_Transferencia.get()),
         }
 
         res = put(

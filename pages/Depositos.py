@@ -59,7 +59,7 @@ class Depositos_Page(PageModel):
                 for direcionamento in self.lista_direcionamentos
                 if direcionamento['nome'] == deposito['direcionamento']
             ][0],
-            'valor': deposito['valor'],
+            'valor': float(deposito['valor']),
             'descricao': deposito['descricao']
         }
 
@@ -738,7 +738,7 @@ class Depositos_Page(PageModel):
         novo_deposito = {
             'novo_id_banco': novo_id_banco,
             'novo_id_direcionamento': novo_id_direcionamento,
-            'novo_valor': self.valor_entry_edit_Deposito.get(),
+            'novo_valor': float(self.valor_entry_edit_Deposito.get()),
             'nova_descricao': self.descricao_entry_edit_Deposito.get(),
         }
 

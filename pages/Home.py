@@ -6,6 +6,11 @@ from .Direcionamentos import Direcionamentos_Page
 from .Depositos import Depositos_Page
 from .Gastos import Gastos_Page
 from .Transferencias import Transferencias_Page
+import pyautogui as pg
+from pathlib import Path
+from time import sleep
+
+DASHBOARD_NAME = 'Dashboard Controle Financeiro.pbix'
 
 
 class HomePage(PageModel):
@@ -14,6 +19,19 @@ class HomePage(PageModel):
         super().__init__(master)
 
         self.master.title('Home')
+
+        self.Button(
+            {
+                **btn_style.large,
+                'text': 'Dashboard',
+                'command': self.abre_dashboard
+            },
+            {
+                'relx': 0.5,
+                'rely': 0.15,
+                'anchor': 'center'
+            }
+        )
         
 
         self.Button(
@@ -23,10 +41,9 @@ class HomePage(PageModel):
                 'command': lambda: self.abre_tela('bancos')
             },
             {
-                'row': 0,
-                'column': 0,
-                'padx': 10,
-                'pady': 10,
+                'relx': 0.25,
+                'rely': 0.35,
+                'anchor': 'center'
             }
         )
 
@@ -37,10 +54,9 @@ class HomePage(PageModel):
                 'command': lambda: self.abre_tela('direcionamentos')
             },
             {
-                'row': 0,
-                'column': 1,
-                'padx': 10,
-                'pady': 10,
+                'relx': 0.75,
+                'rely': 0.35,
+                'anchor': 'center'
             }
         )
 
@@ -51,10 +67,9 @@ class HomePage(PageModel):
                 'command': lambda: self.abre_tela('depositos')
             },
             {
-                'row': 1,
-                'column': 0,
-                'padx': 10,
-                'pady': 10,
+                'relx': 0.25,
+                'rely': 0.55,
+                'anchor': 'center'
             }
         )
 
@@ -65,10 +80,9 @@ class HomePage(PageModel):
                 'command': lambda: self.abre_tela('gastos')
             },
             {
-                'row': 1,
-                'column': 1,
-                'padx': 10,
-                'pady': 10,
+                'relx': 0.75,
+                'rely': 0.55,
+                'anchor': 'center'
             }
         )
 
@@ -80,7 +94,7 @@ class HomePage(PageModel):
             },
             {
                 'relx': 0.5,
-                'rely': 0.5,
+                'rely': 0.75,
                 'anchor': 'center'
             }
         )
@@ -97,6 +111,26 @@ class HomePage(PageModel):
         }
 
         telas[nome_tela](self.master)
+
+    def abre_dashboard (self):
+        local_path = Path(__file__).parent.parent.parent
+
+        pg.keyDown('win')
+        pg.press('r')
+        pg.keyUp('win')
+        pg.write('explorer')
+        pg.press('enter')
+        for _ in range(6):
+            sleep(0.2)
+            pg.press('tab')
+        
+        pg.write(str(local_path))
+        pg.press('enter')
+        pg.press('down')
+        pg.press('down')
+        pg.press('enter')
+
+
 
         
 
