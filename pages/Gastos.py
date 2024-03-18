@@ -947,7 +947,7 @@ class Gastos_Page(PageModel):
 
         novo_id_direcionamento = self.id_por_direcionamento[self.direcionamento_name_comboBox_edit_Gasto.get()]
 
-        novo_deposito = {
+        novo_gasto = {
             'novo_id_banco': novo_id_banco,
             'novo_id_direcionamento': novo_id_direcionamento,
             'novo_valor': float(self.valor_entry_edit_Gasto.get()),
@@ -956,15 +956,15 @@ class Gastos_Page(PageModel):
 
         if tipo_gasto == 'periodizado':
             
-            novo_deposito['novo_dia_abate'] = self.dia_abate_entry_edit_Gasto.get()
-            novo_deposito['novo_total_parcelas'] = self.total_parcelas_entry_edit_Gasto.get()
-            novo_deposito['novo_controle_parcelas'] = self.controle_parcelas_entry_edit_Gasto.get()
+            novo_gasto['novo_dia_abate'] = self.dia_abate_entry_edit_Gasto.get()
+            novo_gasto['novo_total_parcelas'] = self.total_parcelas_entry_edit_Gasto.get()
+            novo_gasto['novo_controle_parcelas'] = self.controle_parcelas_entry_edit_Gasto.get()
             tipo_gasto_route = 'gastos_periodizados'
 
 
         res = put(
             f'http://localhost:8000/{tipo_gasto_route}/{id_gasto}',
-            json=novo_deposito
+            json=novo_gasto
         )
 
         if res.status_code == 500:
