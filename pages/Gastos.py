@@ -320,13 +320,13 @@ class Gastos_Page(PageModel):
             json={'gastos': self.lista_gastos_para_adicionar['gastos_gerais']}
         )
 
+        if self.lista_gastos_para_adicionar['gastos_periodizados']:
+            adicionou_periodizado = post(
+                "http://localhost:8000/gastos_periodizados",
+                json=self.lista_gastos_para_adicionar['gastos_periodizados'][0]
+            )
 
-        adicionou_periodizado = post(
-            "http://localhost:8000/gastos_periodizados",
-            json=self.lista_gastos_para_adicionar['gastos_periodizados'][0]
-        )
-
-        if adicionou_geral.status_code == 201 and adicionou_periodizado.status_code == 201:
+        if adicionou_geral.status_code == 201:
             success_msg('Sucesso', 'Gastos adicionados com sucesso')
             self.conta_gastos = 0
             self.limpa_frame_lista_gastos_adicionar()
