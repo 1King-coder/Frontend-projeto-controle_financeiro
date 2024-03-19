@@ -245,7 +245,9 @@ class Gastos_Page(PageModel):
             f"Gasto {self.conta_gastos + 1}\n" +
             f"\tBanco: {gasto['banco']}\n" +
             f"\tDirecionamento: {gasto['direcionamento']}\n" +
-            f"\tTipo: {gasto['tipo']}\n" 
+            f"\tTipo: {gasto['tipo']}\n" +
+            f"\tValor: {gasto['valor']}\n" +
+            f"\tDescricão: {gasto['descricao']}\n"
         )
 
         if gasto['tipo'] == 'periodizado':

@@ -201,6 +201,7 @@ class Depositos_Page(PageModel):
             f"\tBanco: {deposito['banco']}\n" +
             f"\tDirecionamento: {deposito['direcionamento']}\n" +
             f"\tValor: R$ {deposito['valor']}"
+            f"\tDescrição: {deposito['descricao']}"
         )
 
         self.frame_lista_depositos.Label(
