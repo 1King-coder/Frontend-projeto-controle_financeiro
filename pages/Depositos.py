@@ -506,7 +506,7 @@ class Depositos_Page(PageModel):
             depositos = asyncio.run(get_depositos())
 
         actual_month = datetime.now().month
-        start_of_the_month = datetime.strptime(f'01/{actual_month -1}/{datetime.now().year}', '%d/%m/%Y')
+        start_of_the_month = datetime.strptime(f'01/{actual_month}/{datetime.now().year}', '%d/%m/%Y')
         end_of_the_month = datetime.strptime(f'01/{actual_month + 1 if actual_month != 12 else 1}/{datetime.now().year}', '%d/%m/%Y')
 
         for wid in frame.master.winfo_children()[1:]:
