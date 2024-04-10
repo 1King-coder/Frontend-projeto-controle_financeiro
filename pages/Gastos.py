@@ -364,7 +364,9 @@ class Gastos_Page(PageModel):
             self.conta_gastos = 0
             self.limpa_frame_lista_gastos_adicionar()
             self.lista_gastos_para_adicionar['gastos_gerais'] = []
-            self.lista_gastos_para_adicionar['gastos_periodizados'] = []	
+            self.lista_gastos_para_adicionar['gastos_periodizados'] = []
+            self.listar_gastos_em_frame(self.frame_lista_gastos_edit, "edit", True)	
+            self.listar_gastos_em_frame(self.frame_lista_gastos_delete, "delete", True)	
             return
         
         error_msg('Erro', 'Erro ao adicionar Gastos')
