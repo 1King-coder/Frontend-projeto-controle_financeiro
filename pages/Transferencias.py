@@ -3,15 +3,56 @@ from .Page_model import PageModel
 from .styles.style import *
 from .styles.colors import colors
 from .utils.msg_boxes import error_msg, success_msg, warning_msg
+import asyncio, aiohttp
 from requests import get, post, delete, put
 from datetime import datetime
+
+async def get_dados_bancos_direcionamentos ():
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            session.get('http://127.0.0.1:8000/bancos/', ssl=False),
+            session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
+            session.get('http://127.0.0.1:8000/transferencias_entre_bancos/', ssl=False),
+            session.get('http://127.0.0.1:8000/transferencias_entre_direcionamentos/', ssl=False),
+        ]
+
+        responses = await asyncio.gather(*tasks)
+
+        data = [
+            await response.json() 
+            for response in responses
+        ]
+        
+
+    return data
+
+async def get_transferencias (tipo_transf:str):
+        
+
+        async with aiohttp.ClientSession() as session:
+
+            response = await asyncio.gather(
+                session.get(f'http://127.0.0.1:8000/{tipo_transf}/', ssl=False),
+            )
+            
+
+            data = await response[0].json()
+
+                
+        return data
+
 
 class Transferencias_Page(PageModel):
     def __init__(self, master: ctk.CTk) -> None:
         super().__init__(master)
 
-        self.lista_bancos: list = get('http://127.0.0.1:8000/bancos/').json()
-        self.lista_direcionamentos: list = get('http://127.0.0.1:8000/direcionamentos/').json()
+        dados_direc_banco_transf = asyncio.run(get_dados_bancos_direcionamentos())
+
+        self.lista_bancos = dados_direc_banco_transf[0]
+        self.lista_direcionamentos = dados_direc_banco_transf[1]
+        self.lista_transf_bancos = dados_direc_banco_transf[2]
+        self.lista_transf_direc = dados_direc_banco_transf[3]
+
  
         self.bancos_por_id: dict = {
             banco['id']: banco['nome']
@@ -231,6 +272,8 @@ class Transferencias_Page(PageModel):
 
         if adicionou.status_code == 201:
             success_msg('Sucesso', 'Transferência adicionada com sucesso!')
+            self.listar_transferencias_em_frame('edit', True)
+            self.listar_transferencias_em_frame('delete', True)
             return
         
         error_msg('Erro', 'Erro ao adicionar Transferência!')
@@ -429,15 +472,16 @@ class Transferencias_Page(PageModel):
         main_frame.build()
         self.tab_adiciona_Transferencias.build()
         
-    def listar_transferencias_em_frame (self, page):
+    def listar_transferencias_em_frame (self, page, updating: bool = False):
 
         frame = self.__getattribute__(f'frame_lista_transferencias_{page}')
 
         tipo_transf = 'transferencias_entre_bancos' if not self.__getattribute__(f'tipo_tranferencia_{page}_switch').get() else 'transferencias_entre_direcionamentos'
         
-        transferencias = get(
-            f'http://localhost:8000/{tipo_transf}/'
-        ).json()
+        transferencias = self.lista_transf_bancos if not self.__getattribute__(f'tipo_tranferencia_{page}_switch').get() else self.lista_transf_direc
+
+        if updating:
+            transferencias = asyncio.run(get_transferencias(tipo_transf))
 
         actual_month = datetime.now().month
         start_of_the_month = datetime.strptime(f'01/{actual_month - 1}/{datetime.now().year}', '%d/%m/%Y')
@@ -718,6 +762,8 @@ class Transferencias_Page(PageModel):
             error_msg('Erro', 'Transferência inexistente!')
             return
         
+        self.listar_transferencias_em_frame('edit', True)
+        
         success_msg('Editado', 'Transferência editado com sucesso!')
 
     def deleta_transferencia (self):
@@ -737,6 +783,8 @@ class Transferencias_Page(PageModel):
         if res.status_code == 404:
             error_msg('Erro', 'Gasto inexistente!')
             return
+        
+        self.listar_transferencias_em_frame('delete', True)
 
         success_msg('Deletado', 'Gastos deletado com sucesso!')
 
@@ -963,7 +1011,7 @@ class Transferencias_Page(PageModel):
             {
                 **btn_style.large,
                 'text': 'Atualizar',
-                'command': lambda:self.listar_transferencias_em_frame('edit')
+                'command': lambda:self.listar_transferencias_em_frame('edit', True)
             },
             {
                 'relx': 0.4,
@@ -1200,7 +1248,7 @@ class Transferencias_Page(PageModel):
             {
                 **btn_style.large,
                 'text': 'Atualizar',
-                'command': lambda:self.listar_transferencias_em_frame('edit')
+                'command': lambda:self.listar_transferencias_em_frame('edit', True)
             },
             {
                 'relx': 0.4,
