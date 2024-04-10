@@ -3,15 +3,34 @@ from .Page_model import PageModel
 from .styles.style import *
 from .styles.colors import colors
 from .utils.msg_boxes import error_msg, success_msg, warning_msg
+import asyncio, aiohttp
 from requests import get, post, delete, put
 from datetime import datetime
 
+async def get_dados_bancos_direcionamentos ():
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            session.get('http://127.0.0.1:8000/bancos/', ssl=False),
+            session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
+        ]
+
+        responses = await asyncio.gather(*tasks)
+
+        data = [
+            await response.json() 
+            for response in responses
+        ]
+
+        return data
+ 
 class Gastos_Page(PageModel):
     def __init__(self, master: ctk.CTk) -> None:
         super().__init__(master)
 
-        self.lista_bancos: list = get('http://127.0.0.1:8000/bancos/').json()
-        self.lista_direcionamentos: list = get('http://127.0.0.1:8000/direcionamentos/').json()
+        dados_b_d = asyncio.run(get_dados_bancos_direcionamentos())
+        self.lista_bancos = dados_b_d[0]
+        self.lista_direcionamentos = dados_b_d[1]
+        
         self.conta_gastos = 0
         self.lista_gastos_para_adicionar: dict[str, list[dict]] = {
             'gastos_gerais': [],
@@ -336,7 +355,7 @@ class Gastos_Page(PageModel):
             self.lista_gastos_para_adicionar['gastos_periodizados'] = []	
             return
         
-        error_msg('Erro', 'Erro ao adicionar depósitos')
+        error_msg('Erro', 'Erro ao adicionar Gastos')
 
     def cria_widgets_tab_adiciona_Gastos(self):
         main_frame = PageModel(self.tab_adiciona_Gastos.Frame(
