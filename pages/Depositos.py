@@ -4,15 +4,46 @@ from .styles.style import *
 from .styles.colors import colors
 from .utils.msg_boxes import error_msg, success_msg, warning_msg
 from copy import deepcopy
+import asyncio, aiohttp
 from requests import get, post, delete, put
 from datetime import datetime
+
+async def get_dados_bancos_direcionamentos ():
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            session.get('http://127.0.0.1:8000/bancos/', ssl=False),
+            session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
+            session.get('http://127.0.0.1:8000/depositos/', ssl=False),
+        ]
+
+        responses = await asyncio.gather(*tasks)
+
+        data = [
+            await response.json() 
+            for response in responses
+        ]
+
+    return data
+
+async def get_depositos ():
+        async with aiohttp.ClientSession() as session:
+
+            response = await asyncio.gather(session.get('http://127.0.0.1:8000/depositos/', ssl=False))
+
+            data = await response[0].json()
+                
+        
+        return data
 
 class Depositos_Page(PageModel):
     def __init__(self, master: ctk.CTk) -> None:
         super().__init__(master)
 
-        self.lista_bancos: list = get('http://127.0.0.1:8000/bancos/').json()
-        self.lista_direcionamentos: list = get('http://127.0.0.1:8000/direcionamentos/').json()
+        dados_direc_banco_depos = asyncio.run(get_dados_bancos_direcionamentos())
+
+        self.lista_bancos: list = dados_direc_banco_depos[0]
+        self.lista_direcionamentos: list = dados_direc_banco_depos[1]
+        self.lista_depositos = dados_direc_banco_depos[2]
         self.conta_depositos = 0
         self.lista_depositos_adicionar = []
 
@@ -263,6 +294,8 @@ class Depositos_Page(PageModel):
             self.conta_depositos = 0
             self.limpa_frame_lista_depositos()
             self.lista_depositos_adicionar = []	
+            self.listar_depositos_em_frame(self.frame_lista_depositos_delete, "delete", True)
+            self.listar_depositos_em_frame(self.frame_lista_depositos_edit, "edit", True)
             return
         
         error_msg('Erro', 'Erro ao adicionar depósitos')
@@ -465,14 +498,15 @@ class Depositos_Page(PageModel):
         self.frame_lista_depositos.build()
         self.tab_adiciona_Deposito.build()
         
-    def listar_depositos_em_frame (self, frame, page):
+    def listar_depositos_em_frame (self, frame, page, updating: bool= False):
 
-        depositos = get(
-            'http://127.0.0.1:8000/depositos/'
-        ).json()
+        depositos = self.lista_depositos
+
+        if updating:
+            depositos = asyncio.run(get_depositos())
 
         actual_month = datetime.now().month
-        start_of_the_month = datetime.strptime(f'01/{actual_month}/{datetime.now().year}', '%d/%m/%Y')
+        start_of_the_month = datetime.strptime(f'01/{actual_month -1}/{datetime.now().year}', '%d/%m/%Y')
         end_of_the_month = datetime.strptime(f'01/{actual_month + 1 if actual_month != 12 else 1}/{datetime.now().year}', '%d/%m/%Y')
 
         for wid in frame.master.winfo_children()[1:]:
@@ -756,6 +790,8 @@ class Depositos_Page(PageModel):
             error_msg('Erro', 'Depósitos inexistente!')
             return
         
+        self.listar_depositos_em_frame(self.frame_lista_depositos_edit, "edit", True)
+        
         success_msg('Editado', 'Depósitos editado com sucesso!')
 
     def deleta_deposito (self):
@@ -772,6 +808,8 @@ class Depositos_Page(PageModel):
         if res.status_code == 404:
             error_msg('Erro', 'Depósitos inexistente!')
             return
+        
+        self.listar_depositos_em_frame(self.frame_lista_depositos_delete, "delete", True)
 
         success_msg('Deletado', 'Depósitos deletado com sucesso!')
 
@@ -965,7 +1003,7 @@ class Depositos_Page(PageModel):
             {
                 **btn_style.large,
                 'text': 'Atualizar',
-                'command': lambda:self.listar_depositos_em_frame(self.frame_lista_depositos_edit, 'edit')
+                'command': lambda:self.listar_depositos_em_frame(self.frame_lista_depositos_edit, 'edit', True)
             },
             {
                 'relx': 0.4,
@@ -1169,7 +1207,7 @@ class Depositos_Page(PageModel):
             {
                 **btn_style.large,
                 'text': 'Atualizar',
-                'command': lambda:self.listar_depositos_em_frame(self.frame_lista_depositos_delete, 'delete')
+                'command': lambda:self.listar_depositos_em_frame(self.frame_lista_depositos_delete, 'delete', True)
             },
             {
                 'relx': 0.4,
