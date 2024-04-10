@@ -12,6 +12,7 @@ async def get_dados_bancos_direcionamentos ():
         tasks = [
             session.get('http://127.0.0.1:8000/bancos/', ssl=False),
             session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
+            session.get('http://127.0.0.1:8000/gastos_gerais/', ssl=False),
         ]
 
         responses = await asyncio.gather(*tasks)
@@ -21,15 +22,26 @@ async def get_dados_bancos_direcionamentos ():
             for response in responses
         ]
 
+    return data
+
+async def get_gastos_gerais ():
+        async with aiohttp.ClientSession() as session:
+
+            response = await asyncio.gather(session.get('http://127.0.0.1:8000/gastos_gerais/', ssl=False))
+
+            data = await response[0].json()
+                
+        
         return data
  
 class Gastos_Page(PageModel):
     def __init__(self, master: ctk.CTk) -> None:
         super().__init__(master)
 
-        dados_b_d = asyncio.run(get_dados_bancos_direcionamentos())
-        self.lista_bancos = dados_b_d[0]
-        self.lista_direcionamentos = dados_b_d[1]
+        dados_b_d_g = asyncio.run(get_dados_bancos_direcionamentos())
+        self.lista_bancos = dados_b_d_g[0]
+        self.lista_direcionamentos = dados_b_d_g[1]
+        self.lista_gastos_gerais = dados_b_d_g[2]
         
         self.conta_gastos = 0
         self.lista_gastos_para_adicionar: dict[str, list[dict]] = {
@@ -666,12 +678,12 @@ class Gastos_Page(PageModel):
         self.frame_lista_gastos_adicionar.build()
         self.tab_adiciona_Gastos.build()
         
-    def listar_gastos_em_frame (self, frame, page):
+    def listar_gastos_em_frame (self, frame, page, updating: bool = False):
 
+        gastos_gerais = self.lista_gastos_gerais
 
-        gastos_gerais = get(
-            'http://127.0.0.1:8000/gastos_gerais/'
-        ).json()
+        if updating:
+            gastos_gerais = asyncio.run(get_gastos_gerais())
 
         actual_month = datetime.now().month
         start_of_the_month = datetime.strptime(f'01/{actual_month - 1}/{datetime.now().year}', '%d/%m/%Y')
@@ -954,7 +966,7 @@ class Gastos_Page(PageModel):
         
         self.escreve_dados_gasto_selecionado(page, dados_gasto)
         
-    def edita_gasto (self):
+    def edita_gasto (self, frame):
         tipo_gasto = self.tipo_gasto_comboBox_add_Gasto.get()
         id_gasto = self.gasto_id_entry_edit_Gasto.get()
 
@@ -996,9 +1008,10 @@ class Gastos_Page(PageModel):
             error_msg('Erro', 'Gasto inexistente!')
             return
         
+        self.listar_gastos_em_frame(frame, "edit", True)
         success_msg('Editado', 'Gasto editado com sucesso!')
 
-    def deleta_gasto (self):
+    def deleta_gasto (self, frame):
         id_gasto = self.gasto_id_entry_delete_Gasto.get()
 
         route = 'gastos_gerais'
@@ -1019,6 +1032,8 @@ class Gastos_Page(PageModel):
         if res.status_code == 404:
             error_msg('Erro', 'Gasto inexistente!')
             return
+        
+        self.listar_gastos_em_frame(frame, "delete", True)
 
         success_msg('Deletado', 'Gastos deletado com sucesso!')
 
@@ -1313,7 +1328,7 @@ class Gastos_Page(PageModel):
             {
                 **btn_style.large,
                 'text': 'Editar',
-                'command': self.edita_gasto
+                'command': lambda: self.edita_gasto(self.frame_lista_gastos_edit)
             },
             {
                 'relx': 0.23,
@@ -1657,7 +1672,7 @@ class Gastos_Page(PageModel):
             {
                 **btn_style.large,
                 'text': 'delete',
-                'command': self.deleta_gasto
+                'command': lambda: self.deleta_gasto(self.frame_lista_gastos_delete)
             },
             {
                 'relx': 0.23,
