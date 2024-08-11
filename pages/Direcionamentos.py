@@ -3,6 +3,7 @@ from .Page_model import PageModel
 from .styles.style import *
 from .styles.colors import colors
 from .utils.msg_boxes import error_msg, success_msg, warning_msg
+from .utils.config import HOST_URL
 
 from requests import get, post, delete, put
 
@@ -34,7 +35,7 @@ class Direcionamentos_Page(PageModel):
         self.tab_view.pack(expand=True, fill='both')
 
     def verifica_direcionamento_existe(self, nome_direcionamento: str):
-        direc = get(f"http://localhost:8000/direcionamentos/get-id/{nome_direcionamento}").status_code
+        direc = get(f"{HOST_URL}/direcionamentos/get-id/{nome_direcionamento}").status_code
 
         if direc == 200:
             return True
@@ -49,7 +50,7 @@ class Direcionamentos_Page(PageModel):
             return
         
         adicionou = post(
-            "http://localhost:8000/direcionamentos",
+            f"{HOST_URL}/direcionamentos",
             json={"nome_direcionamento": nome_direcionamento}
         )
         
@@ -61,14 +62,14 @@ class Direcionamentos_Page(PageModel):
 
     def get_dados_direcionamento (self, nome_direcionamento: str) -> tuple:
 
-        response_get_id = get(f"http://localhost:8000/direcionamentos/get-id/{nome_direcionamento}")
+        response_get_id = get(f"{HOST_URL}/direcionamentos/get-id/{nome_direcionamento}")
 
         if response_get_id.status_code == 404:
             return None
 
         id_direcionamento = response_get_id.json()['id_direcionamento']
         
-        res_get_saldo = get(f"http://localhost:8000/direcionamentos/{id_direcionamento}")
+        res_get_saldo = get(f"{HOST_URL}/direcionamentos/{id_direcionamento}")
         
         saldo_direcionamento = res_get_saldo.json()['saldo']
         
@@ -99,7 +100,7 @@ class Direcionamentos_Page(PageModel):
             return
 
         res_get_id = get(
-            f"http://localhost:8000/direcionamentos/get-id/{nome_direcionamento}"
+            f"{HOST_URL}/direcionamentos/get-id/{nome_direcionamento}"
         )
         
         novo_nome = self.novo_nome_direcionamento_entry_edit_comando.get()
@@ -118,7 +119,7 @@ class Direcionamentos_Page(PageModel):
         
         id_direcionamento = res_get_id.json()['id_direcionamento']
 
-        res_edit = put(f"http://localhost:8000/direcionamentos/{id_direcionamento}", json={"novo_nome": novo_nome})
+        res_edit = put(f"{HOST_URL}/direcionamentos/{id_direcionamento}", json={"novo_nome": novo_nome})
         if res_edit == 200:
             success_msg('Editado', 'Direcionamento editado com sucesso!')
             return
@@ -133,10 +134,10 @@ class Direcionamentos_Page(PageModel):
             return
         
         id_direcionamento = get(
-            f"http://localhost:8000/direcionamentos/get-id/{nome_direcionamento}"
+            f"{HOST_URL}/direcionamentos/get-id/{nome_direcionamento}"
         ).json()['id_direcionamento']
 
-        res_deletou = delete(f"http://localhost:8000/direcionamentos/{id_direcionamento}")
+        res_deletou = delete(f"{HOST_URL}/direcionamentos/{id_direcionamento}")
 
         if res_deletou.status_code == 200:
             success_msg('Deletado', 'Direcionamento deletado com sucesso!')

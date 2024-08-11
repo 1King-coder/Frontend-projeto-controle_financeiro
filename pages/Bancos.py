@@ -3,6 +3,7 @@ from .Page_model import PageModel
 from .styles.style import *
 from .styles.colors import colors
 from .utils.msg_boxes import error_msg, success_msg, warning_msg
+from .utils.config import HOST_URL
 
 from requests import get, post, delete, put
 
@@ -33,7 +34,7 @@ class Bancos_Page(PageModel):
         self.tab_view.pack(expand=True, fill='both')
 
     def verifica_banco_existe(self, nome_direcionamento: str):
-        banco = get(f"http://localhost:8000/bancos/get-id/{nome_direcionamento}").status_code
+        banco = get(f"{HOST_URL}/bancos/get-id/{nome_direcionamento}").status_code
 
         if banco == 200:
             return True
@@ -48,7 +49,7 @@ class Bancos_Page(PageModel):
             return
         
         adicionou = post(
-            "http://localhost:8000/bancos",
+            "{HOST_URL}/bancos",
             json={"nome_banco": nome_banco}
         )
         
@@ -60,14 +61,14 @@ class Bancos_Page(PageModel):
 
     def get_dados_banco (self, nome_banco: str) -> tuple:
 
-        response_get_id = get(f"http://localhost:8000/bancos/get-id/{nome_banco}")
+        response_get_id = get(f"{HOST_URL}/bancos/get-id/{nome_banco}")
 
         if response_get_id.status_code == 404:
             return None
         
         id_banco = response_get_id.json()['id_banco']
 
-        res_get_saldo = get(f"http://localhost:8000/bancos/{id_banco}")
+        res_get_saldo = get(f"{HOST_URL}/bancos/{id_banco}")
         
         saldo_banco = res_get_saldo.json()['saldo']
         
@@ -98,7 +99,7 @@ class Bancos_Page(PageModel):
             return
         
         res_get_id = get(
-            f"http://localhost:8000/bancos/get-id/{nome_banco}"
+            f"{HOST_URL}/bancos/get-id/{nome_banco}"
         )
         
         novo_nome = self.novo_nome_banco_entry_edit_comando.get()
@@ -117,7 +118,7 @@ class Bancos_Page(PageModel):
         
         id_banco = res_get_id.json()['id_banco']
 
-        res_edit = put(f"http://localhost:8000/bancos/{id_banco}", json={"novo_nome": novo_nome})
+        res_edit = put(f"{HOST_URL}/bancos/{id_banco}", json={"novo_nome": novo_nome})
         if res_edit.status_code == 200:
             success_msg('Editado', 'Banco editado com sucesso!')
             return
@@ -132,10 +133,10 @@ class Bancos_Page(PageModel):
             return
         
         id_banco = get(
-            f"http://localhost:8000/bancos/get-id/{nome_banco}"
+            f"{HOST_URL}/bancos/get-id/{nome_banco}"
         ).json()['id_banco']
 
-        res_deletou = delete(f"http://localhost:8000/bancos/{id_banco}")
+        res_deletou = delete(f"{HOST_URL}/bancos/{id_banco}")
 
         if res_deletou.status_code == 200:
             success_msg('Deletado', 'Banco deletado com sucesso!')

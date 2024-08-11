@@ -7,13 +7,14 @@ from copy import deepcopy
 import asyncio, aiohttp
 from requests import get, post, delete, put
 from datetime import datetime
+from .utils.config import HOST_URL
 
 async def get_dados_bancos_direcionamentos ():
     async with aiohttp.ClientSession() as session:
         tasks = [
-            session.get('http://127.0.0.1:8000/bancos/', ssl=False),
-            session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
-            session.get('http://127.0.0.1:8000/depositos/', ssl=False),
+            session.get(f'{HOST_URL}/bancos/', ssl=False),
+            session.get(f'{HOST_URL}/direcionamentos/', ssl=False),
+            session.get(f'{HOST_URL}/depositos/', ssl=False),
         ]
 
         responses = await asyncio.gather(*tasks)
@@ -28,7 +29,7 @@ async def get_dados_bancos_direcionamentos ():
 async def get_depositos ():
         async with aiohttp.ClientSession() as session:
 
-            response = await asyncio.gather(session.get('http://127.0.0.1:8000/depositos/', ssl=False))
+            response = await asyncio.gather(session.get(f'{HOST_URL}/depositos/', ssl=False))
 
             data = await response[0].json()
                 
@@ -285,7 +286,7 @@ class Depositos_Page(PageModel):
             self.atualiza_frame_lista_depositos()
         
         adicionou = post(
-            "http://localhost:8000/depositos",
+            f"{HOST_URL}/depositos",
             json={'depositos': self.lista_depositos_adicionar}
         )
 
@@ -778,7 +779,7 @@ class Depositos_Page(PageModel):
         }
 
         res = put(
-            f'http://localhost:8000/depositos/{id_deposito}',
+            f'{HOST_URL}/depositos/{id_deposito}',
             json=novo_deposito
         )
 
@@ -798,7 +799,7 @@ class Depositos_Page(PageModel):
         id_deposito = self.banco_id_entry_delete_Deposito.get()
 
         res = delete(
-            f'http://localhost:8000/depositos/{id_deposito}'
+            f'{HOST_URL}/depositos/{id_deposito}'
         )
 
         if res.status_code == 500:

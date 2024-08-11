@@ -9,6 +9,9 @@ from .Transferencias import Transferencias_Page
 import pyautogui as pg
 from pathlib import Path
 from time import sleep
+from requests import patch
+from .utils.config import HOST_URL
+
 
 DASHBOARD_NAME = 'Dashboard Controle Financeiro.pbix'
 
@@ -17,6 +20,15 @@ class HomePage(PageModel):
 
     def __init__ (self, master: 'ctk.CTk') -> None:
         super().__init__(master)
+
+        # Atualiza controle de parcelas pagas
+        try:
+            sleep(2)
+            patch(f"{HOST_URL}/gastos_periodizados")
+
+        except Exception as e:
+            print(e)
+            return
 
         self.master.title('Home')
 

@@ -6,14 +6,15 @@ from .utils.msg_boxes import error_msg, success_msg, warning_msg
 import asyncio, aiohttp
 from requests import get, post, delete, put
 from datetime import datetime
+from .utils.config import HOST_URL
 
 async def get_dados_bancos_direcionamentos ():
     async with aiohttp.ClientSession() as session:
         tasks = [
-            session.get('http://127.0.0.1:8000/bancos/', ssl=False),
-            session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
-            session.get('http://127.0.0.1:8000/transferencias_entre_bancos/', ssl=False),
-            session.get('http://127.0.0.1:8000/transferencias_entre_direcionamentos/', ssl=False),
+            session.get(f'{HOST_URL}/bancos/', ssl=False),
+            session.get(f'{HOST_URL}/direcionamentos/', ssl=False),
+            session.get(f'{HOST_URL}/transferencias_entre_bancos/', ssl=False),
+            session.get(f'{HOST_URL}/transferencias_entre_direcionamentos/', ssl=False),
         ]
 
         responses = await asyncio.gather(*tasks)
@@ -32,7 +33,7 @@ async def get_transferencias (tipo_transf:str):
         async with aiohttp.ClientSession() as session:
 
             response = await asyncio.gather(
-                session.get(f'http://127.0.0.1:8000/{tipo_transf}/', ssl=False),
+                session.get(f'{HOST_URL}/{tipo_transf}/', ssl=False),
             )
             
 
@@ -266,7 +267,7 @@ class Transferencias_Page(PageModel):
         }
 
         adicionou = post(
-            f"http://localhost:8000/{route}",
+            f"{HOST_URL}/{route}",
             json=transferencia
         )
 
@@ -599,7 +600,7 @@ class Transferencias_Page(PageModel):
                         )
                     )
             
-            frame_transferencia.build()
+                frame_transferencia.build()
 
         frame.build()
 
@@ -750,7 +751,7 @@ class Transferencias_Page(PageModel):
         }
 
         res = put(
-            f'http://localhost:8000/{tipo_transferencia_route}/{id_transferencia}',
+            f'{HOST_URL}/{tipo_transferencia_route}/{id_transferencia}',
             json=novo_deposito
         )
 
@@ -773,7 +774,7 @@ class Transferencias_Page(PageModel):
 
 
         res = delete(
-            f'http://localhost:8000/{route}/{id_transferencia}'
+            f'{HOST_URL}/{route}/{id_transferencia}'
         )
 
         if res.status_code == 500:

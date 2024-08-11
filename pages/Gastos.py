@@ -6,13 +6,14 @@ from .utils.msg_boxes import error_msg, success_msg, warning_msg
 import asyncio, aiohttp
 from requests import get, post, delete, put
 from datetime import datetime
+from .utils.config import HOST_URL
 
 async def get_dados_bancos_direcionamentos ():
     async with aiohttp.ClientSession() as session:
         tasks = [
-            session.get('http://127.0.0.1:8000/bancos/', ssl=False),
-            session.get('http://127.0.0.1:8000/direcionamentos/', ssl=False),
-            session.get('http://127.0.0.1:8000/gastos_gerais/', ssl=False),
+            session.get(f'{HOST_URL}/bancos/', ssl=False),
+            session.get(f'{HOST_URL}/direcionamentos/', ssl=False),
+            session.get(f'{HOST_URL}/gastos_gerais/', ssl=False),
         ]
 
         responses = await asyncio.gather(*tasks)
@@ -27,7 +28,7 @@ async def get_dados_bancos_direcionamentos ():
 async def get_gastos_gerais ():
         async with aiohttp.ClientSession() as session:
 
-            response = await asyncio.gather(session.get('http://127.0.0.1:8000/gastos_gerais/', ssl=False))
+            response = await asyncio.gather(session.get(f'{HOST_URL}/gastos_gerais/', ssl=False))
 
             data = await response[0].json()
                 
@@ -108,8 +109,8 @@ class Gastos_Page(PageModel):
             gasto_para_adicionar.pop('tipo_gasto')
             
             gasto_para_adicionar['dia_abate'] = gasto['dia_abate']
-            gasto_para_adicionar['total_parcelas'] = gasto['total_parcelas']
-            gasto_para_adicionar['controle_parcelas'] = gasto['controle_parcelas']
+            gasto_para_adicionar['total_parcelas'] = int(gasto['total_parcelas'])
+            gasto_para_adicionar['controle_parcelas'] = int(gasto['controle_parcelas'])
 
             self.lista_gastos_para_adicionar['gastos_periodizados'].append(
                 gasto_para_adicionar
@@ -181,7 +182,7 @@ class Gastos_Page(PageModel):
             int(total_parcelas)
             int(ctrl_parcelas)
             float(valor_parcelas)
-            datetime.strptime(dia_abate, '%d-%m-%Y %H:%M:%S')
+            datetime.strptime(dia_abate, '%d/%m/%Y')
 
         except Exception:
             warning_msg('Erro', 'Entradas inválidas!')
@@ -349,17 +350,30 @@ class Gastos_Page(PageModel):
             return
         
         adicionou_geral = post(
-            "http://localhost:8000/gastos_gerais",
+            f"{HOST_URL}/gastos_gerais",
             json={'gastos': self.lista_gastos_para_adicionar['gastos_gerais']}
         )
 
         if self.lista_gastos_para_adicionar['gastos_periodizados']:
             adicionou_periodizado = post(
-                "http://localhost:8000/gastos_periodizados",
+                f"{HOST_URL}/gastos_periodizados",
                 json=self.lista_gastos_para_adicionar['gastos_periodizados'][0]
             )
 
         if adicionou_geral.status_code == 201:
+            if self.lista_gastos_para_adicionar['gastos_periodizados']:
+                if adicionou_periodizado.status_code == 201:
+                    success_msg('Sucesso', 'Gastos adicionados com sucesso')
+                    self.conta_gastos = 0
+                    self.limpa_frame_lista_gastos_adicionar()
+                    self.lista_gastos_para_adicionar['gastos_periodizados'] = []
+                    self.listar_gastos_em_frame(self.frame_lista_gastos_edit, "edit", True)
+                    self.listar_gastos_em_frame(self.frame_lista_gastos_delete, "delete", True)
+                    return
+                else:
+                    error_msg('Erro', 'Erro ao adicionar gastos periodizados')
+                    return
+
             success_msg('Sucesso', 'Gastos adicionados com sucesso')
             self.conta_gastos = 0
             self.limpa_frame_lista_gastos_adicionar()
@@ -959,7 +973,7 @@ class Gastos_Page(PageModel):
 
         if 'periodizado' in dados_gasto:
             gasto_periodizado = get(
-                f'http://127.0.0.1:8000/gastos_periodizados/{dados_gasto[0]}'
+                f'{HOST_URL}/gastos_periodizados/{dados_gasto[0]}'
             ).json()
 
             dados_gasto.append(gasto_periodizado['dia_abate'])
@@ -998,7 +1012,7 @@ class Gastos_Page(PageModel):
 
 
         res = put(
-            f'http://localhost:8000/{tipo_gasto_route}/{id_gasto}',
+            f'{HOST_URL}/{tipo_gasto_route}/{id_gasto}',
             json=novo_gasto
         )
 
@@ -1024,7 +1038,7 @@ class Gastos_Page(PageModel):
             route = 'gastos_periodizados'
 
         res = delete(
-            f'http://localhost:8000/{route}/{id_gasto}'
+            f'{HOST_URL}/{route}/{id_gasto}'
         )
 
         if res.status_code == 500:
