@@ -1,1 +1,1 @@
-HOST_URL = "http://vsbdev.com.br:8000"
+HOST_URL = "http://server-casa-vitorsb:8000"
